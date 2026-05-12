@@ -1,6 +1,3 @@
-"use client";
-
-import React, { useState } from 'react';
 import { 
   Search, 
   LayoutDashboard, 
@@ -9,132 +6,96 @@ import {
   History, 
   Settings, 
   LogOut,
-  ChevronLeft,
-  ChevronRight,
-  Activity,
-  Bell
+  Bell,
+  User as UserIcon,
+  ChevronRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { BackgroundOrbs } from '@/components/ui/design/background-orbs';
+import { CustomCursor } from '@/components/ui/design/custom-cursor';
 
-const sidebarItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/' },
+const navItems = [
+  { icon: LayoutDashboard, label: 'Overview', href: '/' },
+  { icon: Search, label: 'Intelligence', href: '/intelligence' },
   { icon: ShieldAlert, label: 'Investigations', href: '/investigations' },
-  { icon: Database, label: 'Entity Search', href: '/search' },
-  { icon: Activity, label: 'Live Monitor', href: '/monitor' },
-  { icon: History, label: 'Audit Log', href: '/audit' },
+  { icon: Database, label: 'Entity Registry', href: '/entities' },
+  { icon: History, label: 'Audit Logs', href: '/logs' },
+  { icon: Settings, label: 'Settings', href: '/settings' },
 ];
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [collapsed, setCollapsed] = useState(false);
-  const pathname = usePathname();
-
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      {/* Scanning Line Animation Overlay */}
-      <div className="fixed inset-0 pointer-events-none z-50 opacity-[0.03] overflow-hidden">
-        <div className="w-full h-1 bg-primary animate-scan" />
-      </div>
+    <div className="min-h-screen bg-brand-black text-brand-white relative grain">
+      <BackgroundOrbs />
+      <CustomCursor />
 
       {/* Sidebar */}
-      <aside 
-        className={cn(
-          "relative flex flex-col border-r border-border bg-card transition-all duration-300 ease-in-out",
-          collapsed ? "w-16" : "w-64"
-        )}
-      >
-        <div className="flex h-16 items-center justify-between px-4 border-b border-border">
-          {!collapsed && (
-            <div className="flex items-center gap-2">
-              <div className="p-1 rounded bg-primary">
-                <ShieldAlert className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <span className="font-bold tracking-tight text-lg neon-glow">OSINT.PRO</span>
-            </div>
-          )}
-          <button 
-            onClick={() => setCollapsed(!collapsed)}
-            className="p-1 rounded-md hover:bg-muted transition-colors"
-          >
-            {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-          </button>
+      <aside className="fixed left-6 top-6 bottom-6 w-64 glass-panel z-40 hidden lg:flex flex-col">
+        <div className="p-8 flex items-center gap-3">
+          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+            <ShieldAlert className="w-5 h-5 text-black" />
+          </div>
+          <span className="title-serif text-xl tracking-widest uppercase">Osint.io</span>
         </div>
 
-        <nav className="flex-1 space-y-1 p-2 mt-4">
-          {sidebarItems.map((item) => (
-            <Link
-              key={item.href}
+        <nav className="flex-1 px-4 py-4 space-y-2">
+          {navItems.map((item) => (
+            <a
+              key={item.label}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200 group relative",
-                pathname === item.href 
-                  ? "bg-primary/10 text-primary border-l-2 border-primary" 
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                "flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 group",
+                item.href === '/' 
+                  ? "bg-white/10 text-white border border-white/10 shadow-lg" 
+                  : "text-brand-gray-200 hover:bg-white/5 hover:text-white"
               )}
             >
-              <item.icon size={20} className={cn(
-                "min-w-[20px]",
-                pathname === item.href && "neon-glow"
-              )} />
-              {!collapsed && <span className="font-medium text-sm">{item.label}</span>}
-              {collapsed && (
-                <div className="absolute left-14 bg-popover text-popover-foreground px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 border border-border">
-                  {item.label}
-                </div>
-              )}
-            </Link>
+              <item.icon className="w-4 h-4" />
+              <span className="text-[11px] uppercase tracking-[0.15em]">{item.label}</span>
+              {item.href === '/' && <ChevronRight className="w-3 h-3 ml-auto opacity-50" />}
+            </a>
           ))}
         </nav>
 
-        <div className="p-4 border-t border-border space-y-2">
-          <Link href="/settings" className="flex items-center gap-3 px-3 py-2 text-muted-foreground hover:text-foreground transition-colors">
-            <Settings size={20} />
-            {!collapsed && <span className="text-sm font-medium">Settings</span>}
-          </Link>
-          <button className="flex items-center gap-3 px-3 py-2 w-full text-muted-foreground hover:text-destructive transition-colors">
-            <LogOut size={20} />
-            {!collapsed && <span className="text-sm font-medium">Logout</span>}
+        <div className="p-6 border-t border-white/5">
+          <button className="flex items-center gap-3 px-4 py-3 w-full rounded-2xl text-brand-gray-200 hover:bg-white/5 hover:text-white transition-all duration-300">
+            <LogOut className="w-4 h-4" />
+            <span className="text-[11px] uppercase tracking-[0.15em]">Sign Out</span>
           </button>
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <div className="flex flex-col flex-1 overflow-hidden">
-        {/* Topbar */}
-        <header className="h-16 border-b border-border bg-card/50 backdrop-blur-md flex items-center justify-between px-6">
-          <div className="flex-1 max-w-xl">
-            <div className="relative group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" size={18} />
-              <input 
-                type="text" 
-                placeholder="Global Entity Search (Email, IP, Domain...)" 
-                className="w-full bg-muted/50 border border-border rounded-lg py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:bg-background transition-all"
-              />
-            </div>
+      {/* Main Content */}
+      <main className="lg:pl-[300px] p-6 min-h-screen relative z-10">
+        {/* Header */}
+        <header className="flex items-center justify-between mb-8 px-4">
+          <div>
+            <h1 className="title-serif text-3xl mb-1">Dossier Overview</h1>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-brand-gray-300 font-mono">
+              System Status: <span className="text-emerald-500 animate-pulse">Operational</span>
+            </p>
           </div>
 
           <div className="flex items-center gap-4">
-            <button className="relative p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
-              <Bell size={20} />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full neon-border animate-pulse" />
+            <div className="flex items-center gap-2 px-4 py-2 glass-panel border-white/10 rounded-full">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full" />
+              <span className="text-[10px] uppercase tracking-widest text-brand-gray-200">Live Feed</span>
+            </div>
+            
+            <button className="p-3 glass-panel hover:bg-white/5 transition-all">
+              <Bell className="w-4 h-4" />
             </button>
-            <div className="h-8 w-[1px] bg-border" />
-            <div className="flex items-center gap-3 pl-2">
-              <div className="flex flex-col items-end">
-                <span className="text-sm font-semibold">Operator #2027</span>
-                <span className="text-[10px] text-primary uppercase font-bold tracking-widest">Administrator</span>
-              </div>
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-accent border border-primary/50" />
+
+            <div className="w-10 h-10 glass-panel flex items-center justify-center hover:border-white/20 transition-all cursor-none">
+              <UserIcon className="w-5 h-5" />
             </div>
           </div>
         </header>
 
-        {/* Viewport */}
-        <main className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+        <div className="px-4">
           {children}
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }

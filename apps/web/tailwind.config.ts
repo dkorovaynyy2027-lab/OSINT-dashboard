@@ -9,9 +9,25 @@ const config: Config = {
   ],
   theme: {
   	extend: {
+      fontFamily: {
+        sans: ['var(--font-inter)', 'sans-serif'],
+        mono: ['DM Mono', 'monospace'],
+        serif: ['Cormorant Garamond', 'serif'],
+      },
   		colors: {
-  			background: 'hsl(var(--background))',
-  			foreground: 'hsl(var(--foreground))',
+        background: '#070707',
+        foreground: '#efefef',
+        brand: {
+          black: '#070707',
+          deep: '#0c0c0c',
+          white: '#efefef',
+          gray: {
+            100: '#ccc',
+            200: '#888',
+            300: '#444',
+            400: '#1e1e1e',
+          }
+        },
   			card: {
   				DEFAULT: 'hsl(var(--card))',
   				foreground: 'hsl(var(--card-foreground))'

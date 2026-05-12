@@ -18,7 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.variable} ${mono.variable} font-sans antialiased`}>
+      <body className="antialiased font-mono">
         <DashboardLayout>
           {children}
         </DashboardLayout>

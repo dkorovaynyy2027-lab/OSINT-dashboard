@@ -1,38 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 220 20% 6%;
-    --foreground: 210 20% 98%;
-
-    --card: 220 20% 8%;
-    --card-foreground: 210 20% 98%;
-
-    --popover: 220 20% 8%;
-    --popover-foreground: 210 20% 98%;
-
-    --primary: 190 90% 50%;
-    --primary-foreground: 220 20% 6%;
-
-    --secondary: 220 20% 12%;
-    --secondary-foreground: 210 20% 98%;
-
-    --muted: 220 20% 12%;
-    --muted-foreground: 215 20% 65%;
-
-    --accent: 190 90% 50%;
-    --accent-foreground: 220 20% 6%;
-
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 20% 98%;
-
-    --border: 220 20% 15%;
-    --input: 220 20% 15%;
-    --ring: 190 90% 50%;
-
-    --radius: 0.5rem;
+    --background: 0 0% 3%;
+    --foreground: 0 0% 94%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 94%;
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 94%;
+    --primary: 0 0% 94%;
+    --primary-foreground: 0 0% 3%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 94%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 0% 12%;
+    --accent-foreground: 0 0% 94%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 12%;
+    --input: 0 0% 12%;
+    --ring: 0 0% 80%;
+    --radius: 0.75rem;
   }
 }
 
@@ -41,45 +34,67 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    @apply bg-background text-foreground font-mono antialiased overflow-x-hidden;
+    cursor: none;
   }
 }
 
-/* Glassmorphism utilities */
-.glass {
-  background: rgba(15, 20, 30, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+/* ─── Grain Effect ─── */
+.grain::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px;
 }
 
+/* ─── Glassmorphism ─── */
 .glass-panel {
-  @apply glass rounded-xl overflow-hidden shadow-2xl;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+  @apply bg-[#080808]/70 backdrop-blur-[36px] saturate-[200%] border border-white/5 rounded-[28px];
+  box-shadow: 
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    inset 0 -1px 0 rgba(0,0,0,0.4),
+    0 20px 60px rgba(0,0,0,0.55);
 }
 
-/* Neon Glows */
-.neon-glow {
-  text-shadow: 0 0 10px hsl(var(--primary)), 0 0 20px hsl(var(--primary) / 0.5);
+.glass-nav {
+  @apply bg-[#080808]/70 backdrop-blur-[36px] saturate-[200%] border border-white/7 rounded-full px-8 py-4;
+  box-shadow: 
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 20px 60px rgba(0,0,0,0.55);
 }
 
-.neon-border {
-  box-shadow: 0 0 10px hsl(var(--primary) / 0.2), inset 0 0 10px hsl(var(--primary) / 0.2);
+/* ─── Typography ─── */
+.title-serif {
+  @apply font-serif font-light tracking-tight;
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* ─── Animations ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-::-webkit-scrollbar-track {
-  background: hsl(var(--background));
+
+.animate-fade-up {
+  animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted));
-  border-radius: 4px;
+
+/* ─── Custom Cursor ─── */
+#cursor-dot {
+  @apply fixed w-1.5 h-1.5 bg-white rounded-full pointer-events-none z-[9999] transition-[width,height] duration-200 -translate-x-1/2 -translate-y-1/2;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--primary));
+
+#cursor-ring {
+  @apply fixed w-8 h-8 border border-white/30 rounded-full pointer-events-none z-[9998] transition-[width,height,border-color] duration-300 -translate-x-1/2 -translate-y-1/2;
+}
+
+body.hovering #cursor-dot { @apply w-2.5 h-2.5; }
+body.hovering #cursor-ring { @apply w-12 h-12 border-white/60; }
+
+@media (pointer: coarse) {
+  body { cursor: auto; }
+  #cursor-dot, #cursor-ring { @apply hidden; }
 }
