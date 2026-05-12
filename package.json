@@ -1,0 +1,25 @@
+{
+  "name": "osint-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "OSINT intelligence platform — modular providers, investigation workspace, graph relations.",
+  "scripts": {
+    "dev": "pnpm --parallel --filter './apps/*' run dev",
+    "build": "pnpm -r run build",
+    "lint": "pnpm -r run lint",
+    "typecheck": "pnpm -r run typecheck",
+    "api:migrate": "pnpm --filter @osint/api run prisma:migrate",
+    "api:generate": "pnpm --filter @osint/api run prisma:generate",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=20.11",
+    "pnpm": ">=9"
+  },
+  "packageManager": "pnpm@9.12.0"
+}

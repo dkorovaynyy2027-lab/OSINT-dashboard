@@ -1,0 +1,313 @@
+// =============================================================
+// OSINT Platform — Prisma schema
+// =============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ----- RBAC / users -----
+enum Role {
+  ADMIN
+  ANALYST
+  VIEWER
+}
+
+model User {
+  id                String   @id @default(uuid())
+  email             String   @unique
+  passwordHash      String
+  displayName       String
+  role              Role     @default(ANALYST)
+  isActive          Boolean  @default(true)
+  twoFactorEnabled  Boolean  @default(false)
+  twoFactorSecret   String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  lastLoginAt       DateTime?
+
+  sessions          Session[]
+  apiKeys           ApiKey[]
+  investigations    Investigation[]
+  evidence          Evidence[]
+  activityLogs      ActivityLog[]
+  alerts            Alert[]      @relation("AlertAssignee")
+  watchlists        Watchlist[]
+  createdEntities   Entity[]
+
+  @@index([email])
+  @@index([role])
+}
+
+model Session {
+  id                String   @id @default(uuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokenHash  String   @unique
+  userAgent         String?
+  ip                String?
+  createdAt         DateTime @default(now())
+  expiresAt         DateTime
+  revokedAt         DateTime?
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model ApiKey {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  keyHash     String    @unique
+  prefix      String    // first 8 chars, for display
+  scopes      String[]  @default([])
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  revokedAt   DateTime?
+
+  @@index([userId])
+}
+
+// ----- Investigations / Evidence -----
+enum InvestigationStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+  ARCHIVED
+}
+
+model Investigation {
+  id           String              @id @default(uuid())
+  ownerId      String
+  owner        User                @relation(fields: [ownerId], references: [id])
+  title        String
+  description  String?             @db.Text
+  status       InvestigationStatus @default(OPEN)
+  tags         String[]            @default([])
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  closedAt     DateTime?
+
+  entities     Entity[]
+  evidence     Evidence[]
+  alerts       Alert[]
+
+  @@index([ownerId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ----- Entities (the search subjects) -----
+enum EntityKind {
+  EMAIL
+  USERNAME
+  DOMAIN
+  IP
+  PHONE
+  CRYPTO_WALLET
+  SOCIAL_PROFILE
+  COMPANY
+  PERSON
+  ASN
+  HASH
+  URL
+}
+
+model Entity {
+  id              String     @id @default(uuid())
+  kind            EntityKind
+  value           String
+  normalized      String     // canonical lowercase / trimmed
+  notes           String?    @db.Text
+  investigationId String?
+  investigation   Investigation? @relation(fields: [investigationId], references: [id], onDelete: SetNull)
+  createdById     String
+  createdBy       User       @relation(fields: [createdById], references: [id])
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  findings        Finding[]
+  results         ProviderResult[]
+  outRelations    EntityRelation[] @relation("RelationFrom")
+  inRelations     EntityRelation[] @relation("RelationTo")
+
+  @@unique([kind, normalized])
+  @@index([investigationId])
+  @@index([createdById])
+  @@index([kind])
+}
+
+model EntityRelation {
+  id         String   @id @default(uuid())
+  fromId     String
+  toId       String
+  relation   String   // e.g. "owns", "resolves_to", "registered_at"
+  confidence Float    @default(1.0)
+  source     String   // provider name that asserted this
+  createdAt  DateTime @default(now())
+
+  from       Entity   @relation("RelationFrom", fields: [fromId], references: [id], onDelete: Cascade)
+  to         Entity   @relation("RelationTo",   fields: [toId],   references: [id], onDelete: Cascade)
+
+  @@unique([fromId, toId, relation, source])
+  @@index([fromId])
+  @@index([toId])
+}
+
+// ----- Provider results (raw per-provider envelopes) -----
+enum ProviderStatus {
+  OK
+  NOT_FOUND
+  ERROR
+  RATE_LIMITED
+  DISABLED
+}
+
+model ProviderResult {
+  id          String          @id @default(uuid())
+  entityId    String
+  entity      Entity          @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  provider    String
+  status      ProviderStatus
+  data        Json?
+  error       String?
+  durationMs  Int
+  fetchedAt   DateTime        @default(now())
+
+  @@index([entityId])
+  @@index([provider])
+  @@index([fetchedAt])
+}
+
+// ----- Findings (curated, analyst-actionable observations) -----
+enum FindingSeverity {
+  INFO
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model Finding {
+  id          String          @id @default(uuid())
+  entityId    String
+  entity      Entity          @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  source      String          // provider name
+  type        String          // e.g. "breach", "malicious_ip", "open_port"
+  severity    FindingSeverity @default(INFO)
+  score       Float           @default(0)
+  title       String
+  description String          @db.Text
+  payload     Json?
+  createdAt   DateTime        @default(now())
+
+  @@index([entityId])
+  @@index([severity])
+  @@index([type])
+}
+
+// ----- Evidence (uploads / notes attached to investigations) -----
+model Evidence {
+  id              String        @id @default(uuid())
+  investigationId String
+  investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+  uploaderId      String
+  uploader        User          @relation(fields: [uploaderId], references: [id])
+  kind            String        // "file" | "note" | "link"
+  title           String
+  content         String?       @db.Text
+  storagePath     String?
+  mimeType        String?
+  sha256          String?
+  sizeBytes       Int?
+  createdAt       DateTime      @default(now())
+
+  @@index([investigationId])
+  @@index([sha256])
+}
+
+// ----- Watchlists & alerts -----
+enum WatchlistTriggerKind {
+  ENTITY_VALUE
+  PROVIDER_FINDING
+  RISK_SCORE
+}
+
+model Watchlist {
+  id        String                @id @default(uuid())
+  ownerId   String
+  owner     User                  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name      String
+  isActive  Boolean               @default(true)
+  trigger   WatchlistTriggerKind
+  pattern   Json                  // e.g. { kind:"EMAIL", contains:"@example.com" }
+  createdAt DateTime              @default(now())
+  alerts    Alert[]
+
+  @@index([ownerId])
+  @@index([isActive])
+}
+
+enum AlertSeverity {
+  INFO
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AlertStatus {
+  NEW
+  ACKED
+  RESOLVED
+  DISMISSED
+}
+
+model Alert {
+  id              String        @id @default(uuid())
+  watchlistId     String?
+  watchlist       Watchlist?    @relation(fields: [watchlistId], references: [id], onDelete: SetNull)
+  investigationId String?
+  investigation   Investigation? @relation(fields: [investigationId], references: [id], onDelete: SetNull)
+  assigneeId      String?
+  assignee        User?         @relation("AlertAssignee", fields: [assigneeId], references: [id])
+  title           String
+  description     String        @db.Text
+  severity        AlertSeverity @default(MEDIUM)
+  status          AlertStatus   @default(NEW)
+  payload         Json?
+  createdAt       DateTime      @default(now())
+  ackedAt         DateTime?
+  resolvedAt      DateTime?
+
+  @@index([status])
+  @@index([severity])
+  @@index([createdAt])
+}
+
+// ----- Activity / audit log -----
+model ActivityLog {
+  id          String   @id @default(uuid())
+  actorId     String?
+  actor       User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action      String   // "auth.login", "entity.create", "provider.run", etc.
+  targetType  String?
+  targetId    String?
+  ip          String?
+  userAgent   String?
+  correlationId String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  @@index([actorId])
+  @@index([action])
+  @@index([createdAt])
+  @@index([targetType, targetId])
+}

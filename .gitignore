@@ -1,0 +1,35 @@
+node_modules
+dist
+.next
+out
+build
+coverage
+
+# env
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# editor
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.DS_Store
+
+# prisma
+apps/api/prisma/migrations/dev.db*
+
+# docker
+docker/data
+.volumes
+
+# misc
+.turbo
+.cache
+.idea/
