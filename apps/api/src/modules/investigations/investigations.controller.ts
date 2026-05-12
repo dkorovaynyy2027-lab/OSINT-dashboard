@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Param, UseGuards, Req, UsePipes } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { InvestigationsService } from './investigations.service';
+import { GraphService } from './graph.service';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -13,7 +14,24 @@ import { Request } from 'express';
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('investigations')
 export class InvestigationsController {
-  constructor(private readonly investigationsService: InvestigationsService) {}
+  constructor(
+    private readonly investigationsService: InvestigationsService,
+    private readonly graphService: GraphService,
+  ) {}
+
+  @Get(':id/graph')
+  @Roles(Role.ANALYST, Role.ADMIN, Role.VIEWER)
+  @ApiOperation({ summary: 'Get investigation graph state' })
+  getGraph(@Param('id') id: string) {
+    return this.graphService.getState(id);
+  }
+
+  @Post(':id/graph')
+  @Roles(Role.ANALYST, Role.ADMIN)
+  @ApiOperation({ summary: 'Save investigation graph state' })
+  saveGraph(@Param('id') id: string, @Body() data: any) {
+    return this.graphService.saveState(id, data);
+  }
 
   @Post()
   @Roles(Role.ADMIN, Role.ANALYST)

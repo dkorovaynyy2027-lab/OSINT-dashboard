@@ -98,10 +98,19 @@ model Investigation {
   entities     Entity[]
   evidence     Evidence[]
   alerts       Alert[]
+  graphState   GraphState?
 
   @@index([ownerId])
   @@index([status])
   @@index([createdAt])
+}
+
+model GraphState {
+  id              String        @id @default(uuid())
+  investigationId String        @unique
+  investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+  data            Json          // stores { nodes: [{id, x, y, ...}], zoom, pan }
+  updatedAt       DateTime      @updatedAt
 }
 
 // ----- Entities (the search subjects) -----

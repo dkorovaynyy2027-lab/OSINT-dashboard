@@ -5,6 +5,8 @@ import { ShodanProvider } from './integrations/shodan.provider';
 import { HibpProvider } from './integrations/hibp.provider';
 import { VirusTotalProvider } from './integrations/virustotal.provider';
 import { AbuseIpDbProvider } from './integrations/abuseipdb.provider';
+import { WhoisProvider } from './integrations/whois.provider';
+import { DnsProvider } from './integrations/dns.provider';
 import { EntityKind } from '@osint/types';
 
 @Injectable()
@@ -26,6 +28,8 @@ export class ProviderRegistry implements OnModuleInit {
     this.register(new AbuseIpDbProvider({
       apiKey: this.configService.get('ABUSEIPDB_API_KEY'),
     }));
+    this.register(new WhoisProvider());
+    this.register(new DnsProvider());
   }
 
   private register(provider: BaseProvider) {
