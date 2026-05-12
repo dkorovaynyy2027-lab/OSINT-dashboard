@@ -32,6 +32,8 @@ export class EnrichmentProcessor extends WorkerHost {
       ? availableProviders.filter(p => requestedProviders.includes(p.meta.name))
       : availableProviders;
 
+    this.logger.log(`Selected providers for ${entityKind}: ${providersToRun.map(p => p.meta.name).join(', ')}`);
+
     if (providersToRun.length === 0) {
       this.logger.warn(`No suitable providers found for ${entityKind} / ${value}`);
       return { successCount: 0, errorCount: 0 };

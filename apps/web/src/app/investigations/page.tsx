@@ -17,10 +17,17 @@ export default function InvestigationsPage() {
       })
       .then(res => res.json())
       .then(data => {
-        setInvestigations(data);
+        if (Array.isArray(data)) {
+          setInvestigations(data);
+        } else {
+          setInvestigations([]);
+        }
         setIsLoading(false);
       })
-      .catch(() => setIsLoading(false));
+      .catch(() => {
+        setInvestigations([]);
+        setIsLoading(false);
+      });
     } else {
       setIsLoading(false);
     }
@@ -59,7 +66,7 @@ export default function InvestigationsPage() {
       </div>
 
       <div className="space-y-4">
-        {investigations.map((inv) => (
+        {Array.isArray(investigations) && investigations.map((inv) => (
           <Link 
             key={inv.id} 
             href={`/investigations/${inv.id}`}

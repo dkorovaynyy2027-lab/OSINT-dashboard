@@ -17,13 +17,15 @@ export const EntityKind = {
   ASN: 'ASN',
   HASH: 'HASH',
   URL: 'URL',
+  TELEGRAM: 'TELEGRAM',
+  DISCORD: 'DISCORD',
 } as const;
 export type EntityKind = (typeof EntityKind)[keyof typeof EntityKind];
 
 export const entityKindSchema = z.enum([
   'EMAIL', 'USERNAME', 'DOMAIN', 'IP', 'PHONE',
   'CRYPTO_WALLET', 'SOCIAL_PROFILE', 'COMPANY', 'PERSON',
-  'ASN', 'HASH', 'URL',
+  'ASN', 'HASH', 'URL', 'TELEGRAM', 'DISCORD'
 ]);
 
 // ============================================================

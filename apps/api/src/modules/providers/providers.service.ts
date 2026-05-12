@@ -42,7 +42,20 @@ export class ProvidersService {
   }
 
   async quickEnrich(dto: QuickEnrichmentDto, user: SessionUser) {
-    const normalized = dto.value.trim().toLowerCase();
+    let value = dto.value.trim();
+    
+    // Auto-normalize Domain if a full URL is provided
+    if (dto.type === 'DOMAIN' && (value.startsWith('http://') || value.startsWith('https://'))) {
+      try {
+        const url = new URL(value);
+        value = url.hostname;
+      } catch (e) {
+        // Fallback to manual split if URL parsing fails
+        value = value.replace('https://', '').replace('http://', '').split('/')[0];
+      }
+    }
+
+    const normalized = value.toLowerCase();
     
     // Explicitly handle investigationId to ensure it's not ignored if it exists but is undefined in Prisma's view
     const investigationId = dto.investigationId || null;
@@ -54,7 +67,7 @@ export class ProvidersService {
       },
       create: {
         kind: dto.type as any,
-        value: dto.value,
+        value: value,
         normalized,
         createdById: user.id,
         investigationId: investigationId,

@@ -25,8 +25,9 @@ export class SherlockProvider extends BaseProvider {
 
   protected async query(ctx: ProviderRunContext): Promise<ProviderRunResult<any>> {
     const { value } = ctx;
-    const sherlockPath = path.resolve(process.cwd(), 'tools/sherlock');
-    const outputPath = path.resolve(process.cwd(), `tools/sherlock/${value}.json`);
+    const projectRoot = '/Users/korova/Desktop/osint';
+    const sherlockPath = path.join(projectRoot, 'tools/sherlock');
+    const outputPath = path.join(sherlockPath, `${value}.json`);
 
     try {
       // Run sherlock with a timeout and limited site list for speed if needed, 

@@ -12,6 +12,10 @@ import { RedditProvider } from './integrations/reddit.provider';
 import { GeoIpProvider } from './integrations/geoip.provider';
 import { SherlockProvider } from './integrations/sherlock.provider';
 import { MailIntelligenceProvider } from './integrations/mail-intel.provider';
+import { HoleheProvider } from './integrations/holehe.provider';
+import { PhoneIntelligenceProvider } from './integrations/phone-intel.provider';
+import { DiscordProvider } from './integrations/discord.provider';
+import { TelegramProvider } from './integrations/telegram.provider';
 import { EntityKind } from '@osint/types';
 
 @Injectable()
@@ -42,9 +46,14 @@ export class ProviderRegistry implements OnModuleInit {
     this.register(new GeoIpProvider());
     this.register(new SherlockProvider());
     this.register(new MailIntelligenceProvider());
+    this.register(new HoleheProvider());
+    this.register(new PhoneIntelligenceProvider());
+    this.register(new DiscordProvider());
+    this.register(new TelegramProvider());
   }
 
   private register(provider: BaseProvider) {
+    console.log(`[ProviderRegistry] Registering provider: ${provider.meta.name}`);
     this.providers.set(provider.meta.name, provider);
   }
 
