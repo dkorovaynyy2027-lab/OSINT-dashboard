@@ -6,6 +6,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { EntitiesModule } from './modules/entities/entities.module';
 import { InvestigationsModule } from './modules/investigations/investigations.module';
 import { ProvidersModule } from './modules/providers/providers.module';
+import { EventsModule } from './modules/events/events.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ProvidersModule } from './modules/providers/providers.module';
     EntitiesModule,
     InvestigationsModule,
     ProvidersModule,
+    EventsModule,
   ],
   controllers: [],
   providers: [],

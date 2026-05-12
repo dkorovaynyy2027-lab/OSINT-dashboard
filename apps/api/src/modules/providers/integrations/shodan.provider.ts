@@ -1,51 +1,69 @@
-import { BaseProvider, ProviderConfig, ProviderMetadata, ProviderRunContext, ProviderRunResult } from '@osint/plugin-sdk';
+import { 
+  BaseProvider, 
+  ProviderMetadata, 
+  ProviderRunContext, 
+  ProviderRunResult,
+} from '@osint/plugin-sdk';
 import { EntityKind } from '@osint/types';
+import axios from 'axios';
 
-export class ShodanProvider extends BaseProvider<any> {
+export class ShodanProvider extends BaseProvider {
   readonly meta: ProviderMetadata = {
     name: 'shodan',
-    displayName: 'Shodan',
-    description: 'Search engine for Internet-connected devices',
-    supports: [EntityKind.IP, EntityKind.DOMAIN],
-    requiresApiKey: true,
-    homepage: 'https://shodan.io',
-    freeTier: '100/mo (member)',
+    displayName: 'Shodan InternetDB',
+    description: 'Quick lookup for open ports, vulnerabilities, and hostnames',
+    supports: [EntityKind.IP],
+    requiresApiKey: false, // InternetDB is free and doesn't require key, but main API does
+    freeTier: 'Unlimited for InternetDB',
+    homepage: 'https://internetdb.shodan.io/',
   };
 
-  constructor(config: ProviderConfig) {
-    // Configure rate limit and circuit breaker specifically for Shodan if needed
-    super({
-      ...config,
-      rateLimit: { capacity: 1, refillPerSecond: 1 }, // 1 req/sec limit
-    });
-  }
-
   protected async query(ctx: ProviderRunContext): Promise<ProviderRunResult<any>> {
-    const { entityKind, value } = ctx;
-    
-    // In a real implementation, use HTTP client (like axios or built-in fetch/http client from sdk)
-    // const res = await fetch(`https://api.shodan.io/shodan/host/${value}?key=${apiKey}`);
-    // const data = await res.json();
-    
-    // Dummy implementation for scaffolding
-    if (entityKind === EntityKind.IP && value === '8.8.8.8') {
-      return {
-        data: {
-          ip_str: '8.8.8.8',
-          org: 'Google LLC',
-          ports: [53, 443],
-        },
-        riskSignals: [
-          {
-            type: 'open_ports',
-            severity: 'INFO',
-            description: 'Found open DNS and HTTPS ports',
-            score: 0.1,
-          }
-        ]
-      };
-    }
+    const { value } = ctx;
 
-    return { data: null }; // NOT_FOUND
+    try {
+      // Using Shodan InternetDB for fast, no-auth lookups
+      const response = await axios.get(`https://internetdb.shodan.io/${value}`, {
+        timeout: 5000,
+      });
+
+      const data = response.data;
+      if (!data || data.ip !== value) return { data: null };
+
+      const riskSignals = [];
+      if (data.vulns?.length > 0) {
+        riskSignals.push({
+          type: 'vulnerabilities_detected',
+          severity: 'HIGH' as const,
+          score: Math.min(data.vulns.length * 2, 10),
+          description: `Detected ${data.vulns.length} CVEs: ${data.vulns.slice(0, 5).join(', ')}`,
+        });
+      }
+
+      if (data.ports?.length > 0) {
+        riskSignals.push({
+          type: 'open_ports',
+          severity: 'INFO' as const,
+          score: 1,
+          description: `Open ports: ${data.ports.join(', ')}`,
+        });
+      }
+
+      return {
+        data,
+        riskSignals,
+        relatedEntities: data.hostnames?.map((h: string) => ({
+          kind: EntityKind.DOMAIN,
+          value: h,
+          relation: 'resolves_to',
+          confidence: 1.0,
+        })),
+      };
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        return { data: null };
+      }
+      throw error;
+    }
   }
 }

@@ -3,6 +3,7 @@ import { Job } from 'bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProviderRegistry } from './provider.registry';
+import { EventsGateway } from '../events/events.gateway';
 
 @Processor('enrichment')
 @Injectable()
@@ -12,6 +13,7 @@ export class EnrichmentProcessor extends WorkerHost {
   constructor(
     private readonly prisma: PrismaService,
     private readonly providerRegistry: ProviderRegistry,
+    private readonly eventsGateway: EventsGateway,
   ) {
     super();
   }
@@ -19,6 +21,10 @@ export class EnrichmentProcessor extends WorkerHost {
   async process(job: Job<any, any, string>): Promise<any> {
     this.logger.log(`Processing enrichment job ${job.id} for entity ${job.data.entityId}`);
     const { entityId, entityKind, value, requestedProviders } = job.data;
+
+    // Room name for this specific entity enrichment
+    const room = `entity:${entityId}`;
+    this.eventsGateway.emitToRoom(room, 'enrichment.started', { job: job.id, value });
 
     const availableProviders = this.providerRegistry.getProvidersForEntity(entityKind);
     
@@ -107,14 +113,23 @@ export class EnrichmentProcessor extends WorkerHost {
           }
 
           successCount++;
+          this.eventsGateway.emitToRoom(room, 'enrichment.provider_done', { 
+            provider: provider.meta.name, 
+            status: resultEnvelope.status 
+          });
         } catch (error) {
           this.logger.error(`Provider ${provider.meta.name} failed:`, error);
           errorCount++;
+          this.eventsGateway.emitToRoom(room, 'enrichment.provider_error', { 
+            provider: provider.meta.name, 
+            error: String(error) 
+          });
         }
       })
     );
 
     await job.updateProgress(100);
+    this.eventsGateway.emitToRoom(room, 'enrichment.finished', { job: job.id, successCount, errorCount });
     this.logger.log(`Job ${job.id} done. Success: ${successCount}, Errors: ${errorCount}`);
 
     return { totalProviders: providersToRun.length, successCount, errorCount };

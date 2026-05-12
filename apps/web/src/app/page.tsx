@@ -9,6 +9,15 @@ import {
   Info
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { OsintGraph } from '@/components/dashboard/graph/osint-graph';
+
+const demoElements = [
+  { data: { id: '1', label: '8.8.8.8', kind: 'IP' } },
+  { data: { id: '2', label: 'google.com', kind: 'DOMAIN' } },
+  { data: { id: '3', label: 'dns.google', kind: 'DOMAIN' } },
+  { data: { source: '1', target: '2', relation: 'resolves' } },
+  { data: { source: '1', target: '3', relation: 'resolves' } },
+];
 
 export default function Home() {
   return (
@@ -43,6 +52,11 @@ export default function Home() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Graph Section */}
+      <div className="h-[400px] w-full">
+        <OsintGraph elements={demoElements} />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">

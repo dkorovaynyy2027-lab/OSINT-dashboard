@@ -4,6 +4,7 @@ import { BaseProvider } from '@osint/plugin-sdk';
 import { ShodanProvider } from './integrations/shodan.provider';
 import { HibpProvider } from './integrations/hibp.provider';
 import { VirusTotalProvider } from './integrations/virustotal.provider';
+import { AbuseIpDbProvider } from './integrations/abuseipdb.provider';
 import { EntityKind } from '@osint/types';
 
 @Injectable()
@@ -21,6 +22,9 @@ export class ProviderRegistry implements OnModuleInit {
     }));
     this.register(new VirusTotalProvider({
       apiKey: this.configService.get('VIRUSTOTAL_API_KEY'),
+    }));
+    this.register(new AbuseIpDbProvider({
+      apiKey: this.configService.get('ABUSEIPDB_API_KEY'),
     }));
   }
 
