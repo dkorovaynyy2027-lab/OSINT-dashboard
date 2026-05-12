@@ -28,6 +28,16 @@ export class ProvidersService {
       requestedBy: user.id,
     });
 
+    await this.prisma.activityLog.create({
+      data: {
+        actorId: user.id,
+        action: 'enrichment.request',
+        targetType: 'Entity',
+        targetId: entity.id,
+        metadata: { jobId: job.id, requestedProviders: dto.providers },
+      },
+    });
+
     return { jobId: job.id, status: 'Queued' };
   }
 
