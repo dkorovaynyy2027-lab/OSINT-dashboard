@@ -3,6 +3,11 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+
+// Load .env from workspace root
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

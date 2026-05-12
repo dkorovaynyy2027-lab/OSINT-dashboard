@@ -12,8 +12,9 @@ export function BackgroundOrbs() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let W: number, H: number;
-    let orbs: any[] = [];
+    let W = window.innerWidth;
+    let H = window.innerHeight;
+    const orbs: { x: number, y: number, r: number, dx: number, dy: number, alpha: number }[] = [];
 
     const resize = () => {
       W = canvas.width = window.innerWidth;

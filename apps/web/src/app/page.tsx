@@ -4,12 +4,9 @@ import React from 'react';
 import { 
   Activity, 
   ShieldAlert, 
-  Users, 
   Globe, 
-  Clock, 
   AlertCircle,
   Database,
-  Search
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { OsintGraph } from '@/components/dashboard/graph/osint-graph';

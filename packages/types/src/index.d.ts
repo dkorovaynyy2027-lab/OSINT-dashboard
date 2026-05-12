@@ -94,12 +94,12 @@ export declare const createInvestigationSchema: z.ZodObject<{
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
     title: string;
-    tags?: string[] | undefined;
     description?: string | undefined;
+    tags?: string[] | undefined;
 }, {
     title: string;
-    tags?: string[] | undefined;
     description?: string | undefined;
+    tags?: string[] | undefined;
 }>;
 export type CreateInvestigationDto = z.infer<typeof createInvestigationSchema>;
 export declare const enrichmentRequestSchema: z.ZodObject<{
