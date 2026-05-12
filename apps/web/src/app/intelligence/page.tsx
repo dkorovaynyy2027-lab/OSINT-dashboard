@@ -191,8 +191,8 @@ export default function IntelligencePage() {
               <div className="flex flex-col lg:flex-row items-stretch gap-3">
                 <div className="flex-1 relative">
                   <div className="absolute left-8 top-1/2 -translate-y-1/2 flex items-center gap-4 text-brand-gray-400">
-                    <Search className="w-6 h-6 group-focus-within:text-white transition-colors" />
-                    <div className="w-px h-8 bg-white/10" />
+                    <Search className="w-5 h-5 group-focus-within:text-white transition-colors" />
+                    <div className="w-px h-6 bg-white/10" />
                   </div>
                   <input
                     type="text"
@@ -200,7 +200,7 @@ export default function IntelligencePage() {
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                     placeholder={`Enter ${entityTypes.find(t => t.id === selectedType)?.label}...`}
-                    className="w-full bg-transparent py-8 pl-24 pr-10 text-2xl font-light tracking-tight focus:outline-none placeholder:text-brand-gray-600"
+                    className="w-full bg-transparent py-5 pl-24 pr-10 text-xl font-light tracking-tight focus:outline-none placeholder:text-brand-gray-600"
                   />
                   {isLoading && (
                     <div className="absolute bottom-0 left-24 right-10 h-[1px] bg-gradient-to-r from-transparent via-white to-transparent animate-scan" />
