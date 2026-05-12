@@ -102,6 +102,14 @@ export const enrichmentRequestSchema = z.object({
 });
 export type EnrichmentRequestDto = z.infer<typeof enrichmentRequestSchema>;
 
+export const quickEnrichmentSchema = z.object({
+  type: entityKindSchema,
+  value: z.string().min(1).max(512),
+  providers: z.array(z.string().min(1)).optional(),
+  investigationId: z.string().uuid().optional(),
+});
+export type QuickEnrichmentDto = z.infer<typeof quickEnrichmentSchema>;
+
 // ============================================================
 // Provider result envelope (returned by every provider)
 // ============================================================
@@ -129,6 +137,7 @@ export interface RelatedEntity {
 
 export interface RiskSignal {
   type: string;
+  title?: string;
   severity: 'INFO' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   description: string;
   score: number;

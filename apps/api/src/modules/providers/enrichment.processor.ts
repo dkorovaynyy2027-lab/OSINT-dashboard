@@ -68,7 +68,7 @@ export class EnrichmentProcessor extends WorkerHost {
                   type: signal.type,
                   severity: signal.severity as any,
                   score: signal.score,
-                  title: `${signal.severity} signal from ${provider.meta.name}`,
+                  title: (signal as any).title || `${signal.type.split('_').map((s: string) => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')}`,
                   description: signal.description,
                 },
               });
@@ -82,12 +82,15 @@ export class EnrichmentProcessor extends WorkerHost {
               
               const toEntity = await this.prisma.entity.upsert({
                 where: { kind_normalized: { kind: rel.kind as any, normalized: relNormalized } },
-                update: {},
+                update: {
+                  investigationId: job.data.investigationId || null,
+                },
                 create: {
                   kind: rel.kind as any,
                   value: rel.value,
                   normalized: relNormalized,
                   createdById: job.data.requestedBy,
+                  investigationId: job.data.investigationId || null,
                 },
               });
 
