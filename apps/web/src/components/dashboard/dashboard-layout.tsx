@@ -11,9 +11,7 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Terminal,
   Activity,
-  Menu,
   Bell
 } from 'lucide-react';
 import { cn } from '@/lib/utils';

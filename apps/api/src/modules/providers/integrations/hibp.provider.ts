@@ -20,7 +20,7 @@ export class HibpProvider extends BaseProvider<any> {
   }
 
   protected async query(ctx: ProviderRunContext): Promise<ProviderRunResult<any>> {
-    const { entityKind, value, apiKey } = ctx;
+    const { entityKind, value } = ctx;
     
     // Skeleton implementation
     if (entityKind === EntityKind.EMAIL && value === 'test@example.com') {

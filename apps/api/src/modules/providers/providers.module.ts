@@ -3,6 +3,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { ProvidersService } from './providers.service';
 import { ProvidersController } from './providers.controller';
 import { EnrichmentProcessor } from './enrichment.processor';
+import { ProviderRegistry } from './provider.registry';
 
 @Module({
   imports: [
@@ -11,7 +12,7 @@ import { EnrichmentProcessor } from './enrichment.processor';
     }),
   ],
   controllers: [ProvidersController],
-  providers: [ProvidersService, EnrichmentProcessor],
-  exports: [ProvidersService],
+  providers: [ProvidersService, EnrichmentProcessor, ProviderRegistry],
+  exports: [ProvidersService, ProviderRegistry],
 })
 export class ProvidersModule {}

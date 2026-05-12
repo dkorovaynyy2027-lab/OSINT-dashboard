@@ -45,11 +45,18 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    if (user.twoFactorEnabled) {
+    if (user.twoFactorEnabled && user.twoFactorSecret) {
       if (!dto.totpCode) {
         throw new UnauthorizedException('2FA required');
       }
-      // Phase 2: verify TOTP here, skipping for now as per "scaffold" requirements
+      const { authenticator } = await import('otplib');
+      const isTotpValid = authenticator.verify({
+        token: dto.totpCode,
+        secret: user.twoFactorSecret,
+      });
+      if (!isTotpValid) {
+        throw new UnauthorizedException('Invalid TOTP code');
+      }
     }
 
     await this.prisma.user.update({
@@ -121,7 +128,8 @@ export class AuthService {
   }
 
   private async hashToken(token: string): Promise<string> {
-    return require('crypto').createHash('sha256').update(token).digest('hex');
+    const { createHash } = await import('crypto');
+    return createHash('sha256').update(token).digest('hex');
   }
 
   async validateUser(payload: any): Promise<SessionUser | null> {

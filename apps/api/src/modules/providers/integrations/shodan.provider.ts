@@ -21,7 +21,7 @@ export class ShodanProvider extends BaseProvider<any> {
   }
 
   protected async query(ctx: ProviderRunContext): Promise<ProviderRunResult<any>> {
-    const { entityKind, value, apiKey } = ctx;
+    const { entityKind, value } = ctx;
     
     // In a real implementation, use HTTP client (like axios or built-in fetch/http client from sdk)
     // const res = await fetch(`https://api.shodan.io/shodan/host/${value}?key=${apiKey}`);

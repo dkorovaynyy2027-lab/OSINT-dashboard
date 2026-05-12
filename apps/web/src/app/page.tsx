@@ -1,7 +1,6 @@
 import React from 'react';
 import { 
   Users, 
-  Search, 
   ShieldAlert, 
   Zap, 
   TrendingUp, 
@@ -9,6 +8,7 @@ import {
   ExternalLink,
   Info
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function Home() {
   return (

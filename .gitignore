@@ -33,3 +33,5 @@ docker/data
 .turbo
 .cache
 .idea/
+*.tsbuildinfo
+package-lock.json
